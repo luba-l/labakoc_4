@@ -65,18 +65,18 @@ def get_format(path):
 def create_seed(user, password):
 
     user_data = f"""#cloud-config
-    users:
-    - name: {user}
+users:
+  - name: {user}
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
     lock_passwd: false
     plain_text_passwd: '{password}'
-    ssh_pwauth: True
-    """
-    
+ssh_pwauth: True
+"""
+
     meta_data = """instance-id: iid-local01
-    local-hostname: vm
-    """
+local-hostname: vm
+"""
 
     with open("user-data", "w") as f:
         f.write(user_data)
@@ -185,7 +185,6 @@ def create_vm(req: CreateRequest):
         "-nographic"
 
     ])
-
 
     wait_ssh("127.0.0.1", port)
 
