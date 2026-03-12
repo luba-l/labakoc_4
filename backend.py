@@ -104,3 +104,40 @@ local-hostname: vm
     ])
 
     return seed
+
+@app.post("/create_vm")
+def create_vm(req: CreateRequest):
+    name = f"vm_{uuid.uuid4().hex[:6]}"
+    image = IMAGES[req.os]
+    base_image = ensure_image(req.os)
+    fmt = get_format(base_image)
+    seed = create_seed(image["user"], image["password"])
+disk = f"/tmp/{name}.qcow2"
+disk_size = f"{req.disk_size}G"
+
+subprocess.run([
+    "qemu-img",
+    "create",
+    "-f", "qcow2",
+    "-F", fmt,
+    "-b", base_image,
+    disk,
+    "-o", f"size={disk_size}"
+], check=True)
+
+subprocess.Popen([
+
+    "qemu-system-x86_64",
+
+    "-m", str(req.ram),
+    "-smp", str(req.cpu),
+
+    "-drive", f"file={disk},format=qcow2,if=virtio",
+    "-drive", f"file={seed},media=cdrom",
+
+    "-netdev", f"user,id=net0,hostfwd=tcp::{port}-:22",
+    "-device", "virtio-net-pci,netdev=net0",
+
+    "-nographic"
+
+])
