@@ -17,3 +17,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 VM_DIR = os.path.join(BASE_DIR, "vm_images")
 
 os.makedirs(VM_DIR, exist_ok=True)
+
+class CreateRequest(BaseModel):
+
+    type: str
+    os: str
+    cpu: int
+    ram: int | None = None
+    disk_size: int | None = None
