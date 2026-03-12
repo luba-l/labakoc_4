@@ -50,3 +50,21 @@ IMAGES = {
     }
 
 }
+def ensure_image(os_name):
+    image = IMAGES[os_name]
+    path = os.path.join(VM_DIR, image["file"])
+    if not os.path.exists(path):
+        print("Downloading", os_name)
+        urllib.request.urlretrieve(image["url"], path)
+    return path
+
+def get_format(path):
+    result = subprocess.run(
+        ["qemu-img", "info", path],
+        capture_output=True,
+        text=True
+    )
+    for line in result.stdout.splitlines():
+        if "file format" in line:
+            return line.split(":")[1].strip()
+    return "qcow2"
