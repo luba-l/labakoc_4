@@ -68,3 +68,39 @@ def get_format(path):
         if "file format" in line:
             return line.split(":")[1].strip()
     return "qcow2"
+
+def create_seed(user, password):
+
+    user_data = f"""#cloud-config
+users:
+- name: {user}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: false
+    plain_text_passwd: '{password}'
+ssh_pwauth: True
+"""
+
+    meta_data = """instance-id: iid-local01
+local-hostname: vm
+"""
+
+    with open("user-data", "w") as f:
+        f.write(user_data)
+
+    with open("meta-data", "w") as f:
+        f.write(meta_data)
+
+    seed = os.path.join(VM_DIR, "seed.iso")
+
+    subprocess.run([
+        "genisoimage",
+        "-output", seed,
+        "-volid", "cidata",
+        "-joliet",
+        "-rock",
+        "user-data",
+        "meta-data"
+    ])
+
+    return seed
